@@ -9,6 +9,7 @@ import android.widget.TextView;
 
 public class MainActivity extends AppCompatActivity {
     private TextView textView;
+    private MyAsyncTask asyncTask;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -20,8 +21,14 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void test1(View v) {
-        MyAsyncTask asyncTask = new MyAsyncTask();
+        asyncTask = new MyAsyncTask();
         asyncTask.execute("will", "brad", "aaa", "bbb");
+    }
+
+    public void test2(View v) {
+        if (asyncTask != null && !asyncTask.isCancelled()){
+            asyncTask.cancel(true);
+        }
     }
 
     private class MyAsyncTask extends AsyncTask<String, Integer, String> {
@@ -34,16 +41,21 @@ public class MainActivity extends AppCompatActivity {
         @Override
         protected String doInBackground(String... names) {
             int i = 0;
+            String ret = "ok";
 
             for (String name : names) {
                 Log.v("will", "doInBackground: " + name);
                 publishProgress(i, i+10, i+100);
                 try {
                     Thread.sleep(500);
+                    if (isCancelled()){
+                        ret = "cancel";
+                        break;
+                    }
                 } catch (Exception e) {}
                 i++;
             }
-            return "ok";
+            return ret;
         }
 
         @Override
